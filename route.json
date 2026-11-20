@@ -1,1 +1,9 @@
-{ "sections": {} }
+{
+  "chapters": [
+    { "start": "0:00", "title": "Intro", "pin": null, "path": [] },
+    { "start": "5:52", "title": "Get to Armory", "pin": null, "path": [] },
+    { "start": "7:25", "title": "Armory gear up", "pin": null, "path": [] },
+    { "start": "9:10", "title": "BD street clear", "pin": null, "path": [] },
+    { "start": "12:06", "title": "Rest of the route", "pin": null, "path": [] }
+  ]
+}

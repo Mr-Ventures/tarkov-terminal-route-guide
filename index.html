@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terminal Alternative Route Guide</title>
+<meta name="description" content="Escape from Tarkov PvE: Terminal alternative route guide, with chapters.">
+<meta property="og:title" content="Tarkov PvE Terminal Alternative Route Guide">
+<meta property="og:image" content="poster.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preload" href="video/master.m3u8" as="fetch" crossorigin>
+<style>
+  :root {
+    --bg: #0e0f0c; --panel: #171914; --line: #2a2d24; --text: #e6e4d8;
+    --muted: #9a9886; --accent: #c8a84b; --accent-dim: #c8a84b33;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 18px 16px 10px; max-width: 1500px; margin: 0 auto; }
+  h1 { margin: 0; font-size: 20px; letter-spacing: .02em; }
+  header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+  main { max-width: 1500px; margin: 0 auto; padding: 0 16px 32px;
+    display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .player { background: #000; border-radius: 6px; overflow: hidden; }
+  video { display: block; width: 100%; aspect-ratio: 16/9; background: #000; }
+  .strip { display: flex; height: 10px; gap: 2px; margin-top: 8px; cursor: pointer; }
+  .strip div { background: var(--line); border-radius: 2px; position: relative; overflow: hidden; }
+  .strip div:hover { background: #3b3f32; }
+  .strip div span { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+  .bar { display: flex; justify-content: space-between; align-items: center;
+    margin-top: 8px; color: var(--muted); font-size: 13px; gap: 12px; flex-wrap: wrap; }
+  .bar strong { color: var(--text); font-weight: 600; }
+  select { background: var(--panel); color: var(--text); border: 1px solid var(--line);
+    border-radius: 4px; padding: 3px 6px; font: inherit; }
+  aside { background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+    align-self: start; max-height: calc(100vh - 40px); overflow: auto; position: sticky; top: 16px; }
+  @media (max-width: 900px) { aside { position: static; max-height: none; } }
+  aside h2 { margin: 0; padding: 12px 14px; font-size: 13px; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--muted); border-bottom: 1px solid var(--line); }
+  ol { list-style: none; margin: 0; padding: 4px; }
+  li button { width: 100%; display: flex; gap: 12px; align-items: baseline; text-align: left;
+    background: none; border: 0; color: var(--text); font: inherit; padding: 9px 10px;
+    border-radius: 4px; cursor: pointer; }
+  li button:hover { background: #20231b; }
+  li button.active { background: var(--accent-dim); }
+  li button.active .t { color: var(--accent); }
+  .t { font-variant-numeric: tabular-nums; color: var(--muted); min-width: 44px; font-size: 13px; }
+  kbd { border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; font-size: 12px; }
+  .note { margin: 8px; padding: 9px 11px; border-left: 3px solid var(--accent); background: var(--accent-dim);
+    border-radius: 4px; font-size: 13px; }
+  .note strong { color: var(--accent); }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex: none; align-self: center; }
+
+  /* Map */
+  .map-wrap { margin-top: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .map-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+    padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  .map-head h2 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; }
+  #map { display: block; width: 100%; height: auto; background: #222; user-select: none; }
+  #map .route { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; opacity: .35; transition: opacity .2s; }
+  #map .route.on { opacity: 1; stroke-width: 6; }
+  #map .route.on.flow { stroke-dasharray: 14 10; animation: flow 1s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -24; } }
+  #map .pin { cursor: pointer; }
+  #map .pin circle { stroke: #000; stroke-width: 2; }
+  #map .pin text { font: 700 13px system-ui, sans-serif; fill: #000; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  #map .pin.on circle { stroke: #fff; stroke-width: 3; }
+  #map .vtx { fill: #fff; stroke: #000; stroke-width: 1.5; }
+  .editing #map { cursor: crosshair; }
+  button.btn { background: var(--line); color: var(--text); border: 1px solid #3b3f32; border-radius: 4px;
+    padding: 4px 10px; font: inherit; font-size: 13px; cursor: pointer; }
+  button.btn:hover { background: #3b3f32; }
+  button.btn.sel { background: var(--accent); color: #000; border-color: var(--accent); }
+  .tools { display: none; gap: 6px; align-items: center; flex-wrap: wrap; padding: 8px 12px;
+    border-bottom: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  .editing .tools { display: flex; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Terminal Alternative Route Guide</h1>
+  <p>Escape from Tarkov PvE. Click a chapter to jump to it. Links like <code>#t=7:25</code> open at that time.</p>
+</header>
+<main>
+  <section>
+    <div class="player">
+      <video id="v" controls playsinline preload="metadata" poster="poster.jpg"></video>
+    </div>
+    <div class="strip" id="strip" aria-hidden="true"></div>
+    <div class="bar">
+      <span>Now: <strong id="now">…</strong></span>
+      <span><kbd>[</kbd> / <kbd>]</kbd> previous / next chapter &nbsp;
+        <label>Quality <select id="q"><option value="-1">Auto</option></select></label></span>
+    </div>
+
+    <div class="map-wrap" id="mapWrap">
+      <div class="map-head">
+        <h2>Route map</h2>
+        <span>Click a pin to jump to that section.
+          <button class="btn" id="editToggle" type="button">Edit route</button></span>
+      </div>
+      <div class="tools">
+        <label>Section <select id="eSec"></select></label>
+        <button class="btn sel" data-tool="pin" type="button">Place pin</button>
+        <button class="btn" data-tool="line" type="button">Draw line</button>
+        <button class="btn" id="eUndo" type="button">Undo point</button>
+        <button class="btn" id="eClear" type="button">Clear section</button>
+        <span style="flex:1"></span>
+        <button class="btn" id="eExport" type="button">Download route.json</button>
+        <label class="btn" style="cursor:pointer">Load file<input type="file" id="eImport" accept=".json" hidden></label>
+        <button class="btn" id="eReset" type="button">Discard draft</button>
+      </div>
+      <svg id="map" viewBox="0 0 1307 864" role="img" aria-label="Terminal map with route">
+        <image href="map.jpg" width="1307" height="864"/>
+        <g id="routes"></g>
+        <g id="pins"></g>
+      </svg>
+    </div>
+  </section>
+  <aside>
+    <h2>Chapters</h2>
+    <p class="note"><strong>Before you start:</strong> the transit from Shoreline is only open from 21:00 to 06:00.</p>
+    <ol id="list"></ol>
+  </aside>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+<script>
+// Chapter list: [start time, title]. Each chapter runs until the next one starts.
+const CHAPTERS = [
+  ["0:00",  "Intro"],
+  ["5:52",  "Untitled section"],
+  ["7:25",  "Armory gear up"],
+  ["9:10",  "BD street clear"],
+  ["12:06", "Rest of the route"],
+];
+
+const COLORS = ["#e8c547", "#4fc3f7", "#ef6c57", "#7bd389", "#c792ea", "#ff9e40", "#5ad1c4", "#f06292"];
+const SRC = "video/master.m3u8";
+const v = document.getElementById("v");
+const toSec = s => s.split(":").reduce((a, n) => a * 60 + Number(n), 0);
+const fmt = s => { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, x = String(s % 60).padStart(2, "0");
+  return h ? `${h}:${String(m).padStart(2, "0")}:${x}` : `${m}:${x}`; };
+const chapters = CHAPTERS.map(([t, title]) => ({ start: toSec(t), title }));
+
+// Sidebar list
+const list = document.getElementById("list");
+chapters.forEach((c, i) => {
+  const li = document.createElement("li"), b = document.createElement("button");
+  c.key = CHAPTERS[i][0];
+  c.color = COLORS[i % COLORS.length];
+  b.innerHTML = `<span class="dot" style="background:${c.color}"></span><span class="t">${fmt(c.start)}</span><span></span>`;
+  b.lastChild.textContent = c.title;
+  b.onclick = () => seek(c.start);
+  c.btn = b; li.appendChild(b); list.appendChild(li);
+});
+
+function seek(t) {
+  v.currentTime = t;
+  v.play().catch(() => {});
+  history.replaceState(null, "", "#t=" + fmt(t));
+}
+
+// Chapter strip under the video, sized by chapter length
+const strip = document.getElementById("strip");
+function buildStrip() {
+  strip.innerHTML = "";
+  const dur = v.duration;
+  chapters.forEach((c, i) => {
+    c.end = i + 1 < chapters.length ? chapters[i + 1].start : dur;
+    const d = document.createElement("div");
+    d.style.flex = String(Math.max(c.end - c.start, 1));
+    d.title = `${fmt(c.start)} ${c.title}`;
+    d.appendChild(document.createElement("span"));
+    d.onclick = e => { const r = d.getBoundingClientRect();
+      seek(c.start + (e.clientX - r.left) / r.width * (c.end - c.start)); };
+    c.seg = d; strip.appendChild(d);
+  });
+}
+
+let current = -1;
+function update() {
+  const t = v.currentTime;
+  let i = chapters.length - 1;
+  while (i > 0 && t < chapters[i].start) i--;
+  if (i !== current) {
+    chapters[current]?.btn.classList.remove("active");
+    chapters[i].btn.classList.add("active");
+    chapters[i].btn.scrollIntoView({ block: "nearest" });
+    document.getElementById("now").textContent = chapters[i].title;
+    current = i;
+    drawMap();
+  }
+  chapters.forEach(c => { if (c.seg) c.seg.firstChild.style.width =
+    Math.min(100, Math.max(0, (t - c.start) / (c.end - c.start) * 100)) + "%"; });
+}
+v.addEventListener("timeupdate", update);
+v.addEventListener("seeked", update);
+v.addEventListener("loadedmetadata", () => {
+  buildStrip();
+  const m = location.hash.match(/t=([\d:]+)/);
+  if (m) v.currentTime = toSec(m[1]);
+  update();
+});
+
+document.addEventListener("keydown", e => {
+  if (e.target.matches("input, select, textarea")) return;
+  if (e.key === "]" && current < chapters.length - 1) seek(chapters[current + 1].start);
+  if (e.key === "[") seek(chapters[Math.max(0, v.currentTime - chapters[current].start < 3 ? current - 1 : current)].start);
+});
+
+// Playback: hls.js where available, native HLS on Safari / iOS
+const q = document.getElementById("q");
+if (window.Hls && Hls.isSupported()) {
+  const hls = new Hls({ maxBufferLength: 30, maxMaxBufferLength: 90, startLevel: -1,
+    capLevelToPlayerSize: false, backBufferLength: 60 });
+  hls.loadSource(SRC);
+  hls.attachMedia(v);
+  hls.on(Hls.Events.MANIFEST_PARSED, (_, d) => {
+    d.levels.forEach((l, i) => { const o = new Option(l.height + "p", i); q.add(o); });
+  });
+  q.onchange = () => { hls.currentLevel = Number(q.value); };
+  hls.on(Hls.Events.ERROR, (_, d) => {
+    if (!d.fatal) return;
+    if (d.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+    else if (d.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+  });
+} else {
+  v.src = SRC;
+  q.parentElement.style.display = "none";
+}
+
+// ---------- Route map ----------
+// route.json: { "sections": { "<chapter start>": { "pin": [x, y], "path": [[x, y], ...] } } }
+// Coordinates are in map pixels (1307 x 864). Sections are keyed by chapter start time.
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("map"), gRoutes = document.getElementById("routes"), gPins = document.getElementById("pins");
+const wrap = document.getElementById("mapWrap"), eSec = document.getElementById("eSec");
+const DRAFT = "route-draft-v1";
+let route = { sections: {} }, editing = false, tool = "pin";
+
+const sec = key => (route.sections[key] ||= { pin: null, path: [] });
+const el = (tag, attrs) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); return n; };
+
+function drawMap() {
+  gRoutes.replaceChildren(); gPins.replaceChildren();
+  const selKey = editing ? eSec.value : chapters[current]?.key;
+  chapters.forEach((c, i) => {
+    const s = route.sections[c.key]; if (!s) return;
+    const on = c.key === selKey;
+    const pts = (s.pin ? [s.pin] : []).concat(s.path || []);
+    if (pts.length > 1) {
+      gRoutes.appendChild(el("polyline", { points: pts.map(p => p.join(",")).join(" "), stroke: c.color,
+        class: "route" + (on ? " on" : "") + (on && !editing ? " flow" : "") }));
+    }
+    if (editing && on) (s.path || []).forEach(p => gRoutes.appendChild(el("circle", { cx: p[0], cy: p[1], r: 4, class: "vtx" })));
+    if (s.pin) {
+      const g = el("g", { class: "pin" + (on ? " on" : ""), transform: `translate(${s.pin[0]},${s.pin[1]})` });
+      const t = el("title", {}); t.textContent = `${fmt(c.start)} ${c.title}`;
+      g.append(t, el("circle", { r: on ? 15 : 12, fill: c.color }));
+      const n = el("text", {}); n.textContent = i + 1; g.appendChild(n);
+      g.addEventListener("click", e => { if (editing) return; e.stopPropagation(); seek(c.start); });
+      gPins.appendChild(g);
+    }
+  });
+}
+
+function mapPoint(e) {
+  const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+  const q = p.matrixTransform(svg.getScreenCTM().inverse());
+  return [Math.round(q.x), Math.round(q.y)];
+}
+function saveDraft() { try { localStorage.setItem(DRAFT, JSON.stringify(route)); } catch {} drawMap(); }
+
+svg.addEventListener("click", e => {
+  if (!editing) return;
+  const s = sec(eSec.value), p = mapPoint(e);
+  if (tool === "pin") { s.pin = p; tool = "line"; setTool(); } // after the pin, keep drawing the line from it
+  else s.path.push(p);
+  saveDraft();
+});
+
+function setTool() { wrap.querySelectorAll("[data-tool]").forEach(b => b.classList.toggle("sel", b.dataset.tool === tool)); }
+wrap.querySelectorAll("[data-tool]").forEach(b => b.onclick = () => { tool = b.dataset.tool; setTool(); });
+chapters.forEach((c, i) => eSec.add(new Option(`${i + 1}. ${fmt(c.start)} ${c.title}`, c.key)));
+eSec.onchange = () => { const s = route.sections[eSec.value]; tool = s?.pin ? "line" : "pin"; setTool(); drawMap(); };
+
+document.getElementById("editToggle").onclick = e => {
+  editing = !editing;
+  wrap.classList.toggle("editing", editing);
+  e.target.textContent = editing ? "Done editing" : "Edit route";
+  if (editing) { eSec.value = chapters[Math.max(current, 0)].key; eSec.onchange(); } else drawMap();
+};
+document.getElementById("eUndo").onclick = () => { const s = sec(eSec.value);
+  if (s.path.length) s.path.pop(); else s.pin = null; saveDraft(); };
+document.getElementById("eClear").onclick = () => { if (confirm("Clear the pin and line for this section?")) {
+  delete route.sections[eSec.value]; tool = "pin"; setTool(); saveDraft(); } };
+document.getElementById("eExport").onclick = () => {
+  const blob = new Blob([JSON.stringify(route, null, 2)], { type: "application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "route.json"; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+document.getElementById("eImport").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { route = JSON.parse(await f.text()); route.sections ||= {}; saveDraft(); } catch { alert("That file is not a valid route.json"); }
+  e.target.value = "";
+};
+document.getElementById("eReset").onclick = () => { if (confirm("Discard your local edits and reload the published route?")) {
+  try { localStorage.removeItem(DRAFT); } catch {} loadRoute(); } };
+
+async function loadRoute() {
+  let draft = null; try { draft = JSON.parse(localStorage.getItem(DRAFT)); } catch {}
+  if (draft?.sections) route = draft;
+  else try { route = await (await fetch("route.json", { cache: "no-cache" })).json(); route.sections ||= {}; } catch {}
+  drawMap();
+}
+update();
+loadRoute();
+
+// Cache watched segments so seeking back is instant
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
